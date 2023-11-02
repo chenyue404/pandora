@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven-publish'
 
-group='tech.linjiang'
+group = 'tech.linjiang'
 
 android {
     compileSdkVersion versions.COMPILE_SDK
@@ -28,4 +29,24 @@ dependencies {
     api "androidx.recyclerview:recyclerview:1.0.0"
     api "com.google.android.material:material:1.0.0"
     api "com.squareup.okhttp3:okhttp:${versions.OKHTTP}"
+    implementation 'top.canyie.pine:core:0.2.6'
+    implementation 'top.canyie.pine:xposed:0.0.9'
+}
+
+afterEvaluate {
+    println("Components123123: " + components*.name)
+    publishing {
+        publications {
+            components.forEach {
+                println("123123" + it.name)
+                Logging.getLogger("123").debug("123123", it.name)
+            }
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.local.chenyue404'
+                artifactId = 'pandora'
+                version = '1.0.0'
+            }
+        }
+    }
 }
