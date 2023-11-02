@@ -5,6 +5,14 @@ implementation 'com.github.chenyue404:pandora:Tag'
 ```
 [![](https://jitpack.io/v/chenyue404/pandora.svg)](https://jitpack.io/#chenyue404/pandora)
 
+## Release note
+- 0.0.3
+  更换自动添加网络拦截器的方法，不再需要添加classpath和plugin。顺便修复了拦截器顺序太过靠前的问题。
+
+
+
+
+
 <p align=center>
 <img src="https://i.loli.net/2019/03/15/5c8b6158be01e.png" width=40%>
 </p>
