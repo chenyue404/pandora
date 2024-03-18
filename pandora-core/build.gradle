@@ -29,8 +29,8 @@ dependencies {
     api "androidx.recyclerview:recyclerview:1.0.0"
     api "com.google.android.material:material:1.0.0"
     api "com.squareup.okhttp3:okhttp:${versions.OKHTTP}"
-    implementation 'top.canyie.pine:core:0.2.6'
-    implementation 'top.canyie.pine:xposed:0.0.9'
+    implementation 'top.canyie.pine:core:0.2.8'
+    implementation 'top.canyie.pine:xposed:0.1.0'
 }
 
 afterEvaluate {
