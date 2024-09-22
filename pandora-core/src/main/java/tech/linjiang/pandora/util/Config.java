@@ -2,8 +2,9 @@ package tech.linjiang.pandora.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.annotation.IntDef;
 import android.view.Gravity;
+
+import androidx.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,6 +30,7 @@ public class Config {
     private static final String KEY_UI_IGNORE_SYS_LAYER     = "key_ui_ignore_sys_layer";
     private static final String KEY_INTERNAL_DRAG_Y         = "key_internal_drag_y";
     private static final String KEY_PERMISSION              = "key_permission";
+    private static final String KEY_ROUTE_LAUNCH_HISTORY = "KEY_route_launch_history";
 
     private static final boolean DEF_KEY_SHAKE_SWITCH = true;
     private static final int DEF_KEY_SHAKE_THRESHOLD = 1000;
@@ -189,6 +191,16 @@ public class Config {
     public static void setUI_IGNORE_SYS_LAYER(Boolean value) {
         getSp().edit()
                 .putBoolean(KEY_UI_IGNORE_SYS_LAYER, value)
+                .apply();
+    }
+
+    public static String getRouteLaunchHistory() {
+        return getSp().getString(KEY_ROUTE_LAUNCH_HISTORY, "");
+    }
+
+    public static void updateRouteLaunchHistory(String history) {
+        getSp().edit()
+                .putString(KEY_ROUTE_LAUNCH_HISTORY, history)
                 .apply();
     }
 

@@ -1,15 +1,16 @@
 package tech.linjiang.pandora.ui.recyclerview;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,14 @@ public class UniversalAdapter
         data.remove(index);
         notifyItemRemoved(index);
         notifyItemRangeChanged(index, getItemCount() - index);
+    }
+
+    public void removeItems(int positionStart, int itemCount) {
+        for (int i = 0; i < itemCount; i++) {
+            data.remove(positionStart);
+        }
+        notifyItemRangeRemoved(positionStart, itemCount);
+        notifyItemRangeChanged(positionStart + itemCount, getItemCount() - positionStart - itemCount);
     }
 
     public List<BaseItem> getItems() {
