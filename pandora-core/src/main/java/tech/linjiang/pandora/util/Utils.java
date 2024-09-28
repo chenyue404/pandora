@@ -12,11 +12,12 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -125,12 +126,13 @@ public class Utils {
         return value;
     }
 
-    public static String formatDuration(long ms){
+    public static String formatDuration(long duration) {
         String time = "";
-        ms /= 1000;
-        long hour = ms / 3600;
-        long mint = (ms % 3600) / 60;
-        long sed = ms % 60;
+        long ms = duration % 1000;
+        duration /= 1000;
+        long hour = duration / 3600;
+        long mint = (duration % 3600) / 60;
+        long sed = duration % 60;
         if (hour > 0) {
             String hourStr = String.valueOf(hour);
             time += hourStr + "h ";
@@ -142,6 +144,10 @@ public class Utils {
         if (sed > 0) {
             String sedStr = String.valueOf(sed);
             time += sedStr + "s";
+        }
+        if (ms > 0) {
+            String msStr = String.valueOf(ms);
+            time += msStr + "ms";
         }
         return time;
     }

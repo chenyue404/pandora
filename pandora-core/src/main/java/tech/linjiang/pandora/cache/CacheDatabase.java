@@ -25,7 +25,7 @@ class CacheDatabase extends SQLiteOpenHelper {
 
     private static final String TAG = "CacheDatabase";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "pandora.db";
 
     private static final List<Class> tables = new ArrayList<>();
@@ -220,7 +220,6 @@ class CacheDatabase extends SQLiteOpenHelper {
         if (!TextUtils.isEmpty(suffix)) {
             sql += " " + suffix;
         }
-        Log.i(TAG, "queryList: " + sql);
         try {
             Cursor cursor = CacheDatabase.getRDb().rawQuery(sql, null);
             while (cursor.moveToNext()) {

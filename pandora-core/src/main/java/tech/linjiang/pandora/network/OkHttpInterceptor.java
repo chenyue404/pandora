@@ -6,6 +6,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -54,7 +55,8 @@ public class OkHttpInterceptor implements Interceptor {
         if (delayReq > 0) {
             try {
                 Thread.sleep(delayReq);
-            } catch (Throwable ignore){}
+            } catch (Throwable ignore) {
+            }
         }
 
         Response response;
@@ -72,7 +74,8 @@ public class OkHttpInterceptor implements Interceptor {
         if (delayRes > 0) {
             try {
                 Thread.sleep(delayRes);
-            } catch (Throwable ignore){}
+            } catch (Throwable ignore) {
+            }
         }
 
         if (Config.isNetLogEnable() && id >= 0) {
@@ -86,16 +89,18 @@ public class OkHttpInterceptor implements Interceptor {
     private long insert(Request request) {
         Summary summary = new Summary();
         Content content = new Content();
+        HttpUrl url = request.url();
 
         summary.status = Summary.Status.REQUESTING;
-        summary.url = request.url().encodedPath();
-        summary.host = request.url().host() + ":" + request.url().port();
+        summary.url = url.toString();
+        summary.path = url.encodedPath();
+        summary.host = url.host();
         summary.method = request.method();
-        summary.ssl = request.isHttps();
+        summary.ssl = request.isHttps() + "";
         summary.start_time = System.currentTimeMillis();
         summary.requestHeader = FormatUtil.formatHeaders(request.headers());
 
-        String query = request.url().encodedQuery();
+        String query = url.encodedQuery();
         if (!TextUtils.isEmpty(query)) {
             summary.query = query;
         }
@@ -123,7 +128,7 @@ public class OkHttpInterceptor implements Interceptor {
     }
 
     private void updateSummary(long reqId, Response response) {
-        Summary summary =Summary.query(reqId);
+        Summary summary = Summary.query(reqId);
         if (summary == null) {
             return;
         }

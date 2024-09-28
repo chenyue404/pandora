@@ -2,10 +2,13 @@ package tech.linjiang.pandora.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.MenuItem;
 import android.view.View;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +34,7 @@ import tech.linjiang.pandora.util.Utils;
 public class NetSummaryFragment extends BaseListFragment {
 
     private Summary originData;
+    private Content cacheContent;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -61,7 +65,7 @@ public class NetSummaryFragment extends BaseListFragment {
                             launch(NetContentFragment.class, bundle);
                         }
                     } else {
-                        String value = ((String[])item.data)[1];
+                        String value = ((String[]) item.data)[1];
                         if (!TextUtils.isEmpty(value)) {
                             Utils.copy2ClipBoard(value);
                         }
@@ -69,6 +73,118 @@ public class NetSummaryFragment extends BaseListFragment {
                 }
             }
         });
+        getToolbar().getMenu().add(-1, 0, 0, R.string.pd_name_copy_value);
+        getToolbar().getMenu().add(-1, 0, 1, R.string.pd_name_share);
+        getToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(final MenuItem item) {
+                if (originData == null) return false;
+                final int order = item.getOrder();
+                if (cacheContent == null &&
+                        (originData.status == Summary.Status.ERROR
+                                || originData.request_size > 0
+                                || originData.response_size > 0
+                        )
+                ) {
+                    queryContent(id, new Runnable() {
+                        @Override
+                        public void run() {
+                            final String msg = buildStr();
+                            if (order == 0) {
+                                Utils.copy2ClipBoard(msg);
+                            } else if (order == 1) {
+                                saveAsFileAndShare(msg);
+                            }
+                        }
+                    });
+                } else {
+                    final String msg = buildStr();
+                    if (order == 0) {
+                        Utils.copy2ClipBoard(msg);
+                    } else if (order == 1) {
+                        saveAsFileAndShare(msg);
+                    }
+                }
+
+                return true;
+            }
+        });
+    }
+
+    private String buildStr() {
+        StringBuilder sb = new StringBuilder();
+        StringBuilder n = new StringBuilder("\n");
+        StringBuilder t = new StringBuilder("\t");
+        String requestContentType = originData.request_content_type;
+        String responseContentType = originData.response_content_type;
+        sb.append("░░░░░░░░░░░░░░ Request ░░░░░░░░░░░░░░").append(n)
+                .append("URL: ").append(originData.url).append(n)
+                .append("Method: ").append(originData.method).append(n)
+                .append("StartTime: ").append(Utils.millis2String(originData.start_time)).append(n)
+                .append("EndTime: ").append(Utils.millis2String(originData.end_time)).append(n)
+                .append("Method: ").append(originData.method).append(n)
+                .append("Content-Type: ").append(requestContentType).append(n)
+                .append("Body size: ").append(Utils.formatSize(originData.request_size)).append(n);
+        addHeaderStr(originData.request_header, sb);
+        if (cacheContent != null
+                && cacheContent.requestBody != null
+                && isContentTypeValid(requestContentType)
+        ) {
+            sb.append("Body:").append(n)
+                    .append(cacheContent.requestBody).append(n);
+        }
+
+        sb.append(n);
+        sb.append("░░░░░░░░░░░░░░ Response ░░░░░░░░░░░░░░").append(n)
+                .append("Status: ").append(originData.code).append(n)
+                .append("Duration: ").append(Utils.formatDuration(originData.end_time - originData.start_time)).append(n)
+                .append("Content-Type: ").append(responseContentType).append(n)
+                .append("Body size: ").append(Utils.formatSize(originData.response_size)).append(n);
+        addHeaderStr(originData.response_header, sb);
+        if (cacheContent != null
+                && cacheContent.responseBody != null
+                && isContentTypeValid(responseContentType)
+        ) {
+            sb.append("Body:").append(n)
+                    .append(cacheContent.responseBody).append(n);
+        }
+
+        return sb.toString();
+    }
+
+    private boolean isContentTypeValid(String type) {
+        return type == null || type.contains("json") || type.contains("text");
+    }
+
+    private void addHeaderStr(List<Pair<String, String>> header, StringBuilder sb) {
+        StringBuilder n = new StringBuilder("\n");
+        StringBuilder t = new StringBuilder("\t");
+        for (int i = 0; i < header.size(); i++) {
+            Pair<String, String> pair = header.get(i);
+            if (i == 0) {
+                sb.append("Headers:").append(n);
+            }
+            sb.append(t).append(pair.first).append(": ").append(pair.second).append(n);
+        }
+    }
+
+    private void queryContent(final long id, final Runnable runnable) {
+        showLoading();
+        new SimpleTask<>(new SimpleTask.Callback<Void, Content>() {
+            @Override
+            public Content doInBackground(Void[] params) {
+                return Content.query(id);
+            }
+
+            @Override
+            public void onPostExecute(Content result) {
+                hideLoading();
+                cacheContent = result;
+                if (runnable != null) {
+                    runnable.run();
+                }
+            }
+        }).execute();
     }
 
     private void loadData(final long id) {
@@ -76,7 +192,7 @@ public class NetSummaryFragment extends BaseListFragment {
         new SimpleTask<>(new SimpleTask.Callback<Void, Summary>() {
             @Override
             public Summary doInBackground(Void[] params) {
-                Summary summary =  Summary.query(id);
+                Summary summary = Summary.query(id);
                 summary.request_header = FormatUtil.parseHeaders(summary.requestHeader);
                 summary.response_header = FormatUtil.parseHeaders(summary.responseHeader);
                 return summary;
@@ -90,22 +206,23 @@ public class NetSummaryFragment extends BaseListFragment {
                     return;
                 }
                 originData = summary;
-                getToolbar().setTitle(summary.url);
+                getToolbar().setTitle(summary.path);
                 getToolbar().setSubtitle(String.valueOf(summary.code == 0 ? "- -" : summary.code));
 
                 List<BaseItem> data = new ArrayList<>();
 
-                if (summary.status == 1) {
+                if (summary.status == Summary.Status.ERROR) {
                     Content content = Content.query(id);
                     data.add(new ExceptionItem(content.responseBody));
                 }
 
                 data.add(new TitleItem("GENERAL"));
                 data.add(new KeyValueItem(Utils.newArray("url", summary.url)));
+                data.add(new KeyValueItem(Utils.newArray("path", summary.path)));
                 data.add(new KeyValueItem(Utils.newArray("host", summary.host)));
                 data.add(new KeyValueItem(Utils.newArray("method", summary.method)));
                 data.add(new KeyValueItem(Utils.newArray("protocol", summary.protocol)));
-                data.add(new KeyValueItem(Utils.newArray("ssl", String.valueOf(summary.ssl))));
+                data.add(new KeyValueItem(Utils.newArray("ssl", summary.ssl)));
                 data.add(new KeyValueItem(Utils.newArray("start_time", Utils.millis2String(summary.start_time))));
                 data.add(new KeyValueItem(Utils.newArray("end_time", Utils.millis2String(summary.end_time))));
                 data.add(new KeyValueItem(Utils.newArray("req content-type", summary.request_content_type)));
@@ -113,10 +230,10 @@ public class NetSummaryFragment extends BaseListFragment {
                 data.add(new KeyValueItem(Utils.newArray("request_size", Utils.formatSize(summary.request_size))));
                 data.add(new KeyValueItem(Utils.newArray("response_size", Utils.formatSize(summary.response_size))));
 
-                if (!TextUtils.isEmpty(summary.query)) {
-                    data.add(new TitleItem(""));
-                    data.add(new KeyValueItem(Utils.newArray("query", summary.query)));
-                }
+//                if (!TextUtils.isEmpty(summary.query)) {
+//                    data.add(new TitleItem(""));
+//                    data.add(new KeyValueItem(Utils.newArray("query", summary.query)));
+//                }
 
                 data.add(new TitleItem("BODY"));
                 KeyValueItem request = new KeyValueItem(Utils.newArray("request body", "tap to view"), false, true);
@@ -193,5 +310,36 @@ public class NetSummaryFragment extends BaseListFragment {
             }
         }).execute(new File(path));
         showLoading();
+    }
+
+    private void saveAsFileAndShare(String msg) {
+        showLoading();
+        new SimpleTask<>(new SimpleTask.Callback<String, Intent>() {
+            @Override
+            public Intent doInBackground(String[] params) {
+                String path = FileUtil.saveFile(params[0].getBytes(), "netLog", "txt");
+                String newPath = FileUtil.fileCopy2Tmp(new File(path));
+                if (!TextUtils.isEmpty(newPath)) {
+                    return FileUtil.getFileIntent(newPath);
+                }
+                return null;
+            }
+
+            @Override
+            public void onPostExecute(Intent result) {
+                hideLoading();
+                if (result != null) {
+                    try {
+                        startActivity(result);
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                        Utils.toast(t.getMessage());
+                    }
+                } else {
+                    Utils.toast(R.string.pd_failed);
+                }
+
+            }
+        }).execute(msg);
     }
 }

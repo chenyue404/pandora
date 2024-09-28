@@ -209,8 +209,7 @@ public class NetFragment extends BaseListFragment implements Toolbar.OnMenuItemC
                 if (originData.get(i) instanceof NetItem) {
                     Summary summary = (Summary) originData.get(i).data;
                     String url = summary.url;
-                    String host = summary.host;
-                    if (url.contains(condition) || host.contains(condition)) {
+                    if (url.contains(condition)) {
                         tmpFilter.add(originData.get(i));
                     }
                 }

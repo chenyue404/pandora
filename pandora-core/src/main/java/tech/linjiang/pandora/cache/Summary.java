@@ -1,8 +1,9 @@
 package tech.linjiang.pandora.cache;
 
 import android.provider.BaseColumns;
-import androidx.annotation.IntDef;
 import android.util.Pair;
+
+import androidx.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,6 +31,8 @@ public class Summary {
     public int code;
     @CacheDatabase.Column("url")
     public String url;
+    @CacheDatabase.Column("path")
+    public String path;
     @CacheDatabase.Column("query")
     public String query;
     @CacheDatabase.Column("host")
@@ -39,7 +42,7 @@ public class Summary {
     @CacheDatabase.Column("protocol")
     public String protocol;
     @CacheDatabase.Column("ssl")
-    public boolean ssl;
+    public String ssl;
     @CacheDatabase.Column("start_time")
     public long start_time;
     @CacheDatabase.Column("end_time")
@@ -62,13 +65,13 @@ public class Summary {
 
 
     public static List<Summary> queryList() {
-        String condition = "order by start_time desc limit " + String.valueOf(Config.getNETWORK_PAGE_SIZE());
+        String condition = "order by start_time desc limit " + Config.getNETWORK_PAGE_SIZE();
         List<Summary> result = CacheDatabase.queryList(Summary.class, null, condition);
         return result;
     }
 
     public static Summary query(long id) {
-        List<Summary> result = CacheDatabase.queryList(Summary.class, BaseColumns._ID + " = " + String.valueOf(id), "limit 1");
+        List<Summary> result = CacheDatabase.queryList(Summary.class, BaseColumns._ID + " = " + id, "limit 1");
         if (Utils.isNotEmpty(result)) {
             return result.get(0);
         }

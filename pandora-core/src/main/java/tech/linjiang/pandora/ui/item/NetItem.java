@@ -5,8 +5,8 @@ import android.text.TextUtils;
 
 import java.util.Locale;
 
-import tech.linjiang.pandora.core.R;
 import tech.linjiang.pandora.cache.Summary;
+import tech.linjiang.pandora.core.R;
 import tech.linjiang.pandora.ui.recyclerview.BaseItem;
 import tech.linjiang.pandora.ui.recyclerview.UniversalAdapter;
 import tech.linjiang.pandora.util.Utils;
@@ -34,7 +34,7 @@ public class NetItem extends BaseItem<Summary> {
                 (data.status == 1 ? R.drawable.pd_error : R.drawable.pd_done));
 
         pool.setTextColor(R.id.item_net_url, done && data.code > 0 && data.code != 200 ? Color.BLUE : Color.BLACK);
-        pool.setText(R.id.item_net_url, data.url)
+        pool.setText(R.id.item_net_url, data.path)
                 .setText(R.id.item_net_host, data.host)
                 .setText(R.id.item_net_info,
                         String.format(Locale.getDefault(), "%s    %s    %s%s%s",
