@@ -7,12 +7,6 @@ import android.content.pm.ApplicationInfo;
 
 import androidx.core.content.FileProvider;
 
-import java.util.Iterator;
-
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import tech.linjiang.pandora.crash.CrashHandler;
 import tech.linjiang.pandora.database.Databases;
 import tech.linjiang.pandora.function.IFunc;
@@ -22,7 +16,6 @@ import tech.linjiang.pandora.network.OkHttpInterceptor;
 import tech.linjiang.pandora.preference.SharedPref;
 import tech.linjiang.pandora.util.SensorDetector;
 import tech.linjiang.pandora.util.Utils;
-import top.canyie.pine.PineConfig;
 
 /**
  * Created by linjiang on 29/05/2018.
@@ -61,27 +54,27 @@ public final class Pandora extends FileProvider implements SensorDetector.Callba
 
     private void addInterceptor(Application app) {
         boolean isApkInDebug = (app.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        PineConfig.debug = isApkInDebug; // 是否debug，true会输出较详细log
-        PineConfig.debuggable = isApkInDebug; // 该应用是否可调试，建议和配置文件中的值保持一致，否则会出现问题
-
-        XposedHelpers.findAndHookConstructor(
-                OkHttpClient.class,
-                OkHttpClient.Builder.class,
-                new XC_MethodHook() {
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) {
-                        OkHttpClient.Builder builder = (OkHttpClient.Builder) param.args[0];
-                        Iterator<Interceptor> iterator = builder.interceptors().iterator();
-                        while (iterator.hasNext()) {
-                            Interceptor interceptor = iterator.next();
-                            if (interceptor instanceof OkHttpInterceptor) {
-                                iterator.remove();
-                            }
-                        }
-                        builder.addInterceptor(interceptor);
-                    }
-                }
-        );
+//        PineConfig.debug = isApkInDebug; // 是否debug，true会输出较详细log
+//        PineConfig.debuggable = isApkInDebug; // 该应用是否可调试，建议和配置文件中的值保持一致，否则会出现问题
+//
+//        XposedHelpers.findAndHookConstructor(
+//                OkHttpClient.class,
+//                OkHttpClient.Builder.class,
+//                new XC_MethodHook() {
+//                    @Override
+//                    protected void beforeHookedMethod(MethodHookParam param) {
+//                        OkHttpClient.Builder builder = (OkHttpClient.Builder) param.args[0];
+//                        Iterator<Interceptor> iterator = builder.interceptors().iterator();
+//                        while (iterator.hasNext()) {
+//                            Interceptor interceptor = iterator.next();
+//                            if (interceptor instanceof OkHttpInterceptor) {
+//                                iterator.remove();
+//                            }
+//                        }
+//                        builder.addInterceptor(interceptor);
+//                    }
+//                }
+//        );
     }
 
     public static Pandora get() {
